@@ -21,6 +21,25 @@ export default function DashboardPage() {
     fetchMonitors();
   }, []);
 
+  // Auto-refresh monitors every 30 seconds in the background
+  // This creates a "live" dashboard experience similar to UptimeRobot
+  // Updates happen silently without blocking user interactions or showing loading state
+  useEffect(() => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const data = await getMonitors();
+        setMonitors(data || []);
+      } catch (err) {
+        // Silently log background refresh errors
+        // Don't show alerts or loading states to avoid disrupting UX
+        console.error("Background monitor refresh failed:", err);
+      }
+    }, 30000); // 30 seconds
+
+    // Cleanup: clear interval on unmount to prevent memory leaks
+    return () => clearInterval(pollInterval);
+  }, []);
+
   // Fetch monitors from API
   const fetchMonitors = async () => {
     setIsLoading(true);
