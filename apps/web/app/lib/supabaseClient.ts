@@ -16,6 +16,7 @@ export interface Monitor {
     checked_at: string;
     response_time_ms?: number | null;
   } | null;
+  check_history?: MonitorCheck[];
 }
 
 export interface MonitorCheck {

@@ -1,12 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { Monitor, runCheck, deleteMonitor } from "../lib/supabaseClient";
+import { Monitor, MonitorCheck, runCheck, deleteMonitor } from "../lib/supabaseClient";
 
-interface MonitorCardProps {
-  monitor: Monitor;
-  onDeleted: (monitorId: string) => void;
-  onCheckCompleted: (monitorId: string, status: "up" | "down") => void;
+/**
+ * StatusHistoryIndicator Component
+ * Displays last N check statuses as small colored dots
+ * Gives a quick visual overview of uptime trend
+ */
+function StatusHistoryIndicator({ history }: { history: MonitorCheck[] | undefined }) {
+  // Return nothing if no history available
+  if (!history || history.length === 0) {
+    return null;
+  }
+
+  // Show last 10 checks (most recent first, but display left-to-right chronologically)
+  // Reverse to show oldest on left, newest on right
+  const lastChecks = history.slice(0, 10).reverse();
+
+  // Build accessibility label describing the sequence
+  const statusSequence = lastChecks
+    .map((check) => (check.status === "up" ? "Up" : check.status === "down" ? "Down" : "Unknown"))
+    .join(", ");
+
+  return (
+    <div className="mt-2 pt-2 border-t border-gray-100">
+      <div className="flex items-center gap-1.5" aria-label={`Last 10 checks: ${statusSequence}`}>
+        {lastChecks.map((check, idx) => (
+          <div
+            key={`${check.id}-${idx}`}
+            className={`w-2 h-6 rounded-sm transition-colors duration-200 ${
+              check.status === "up"
+                ? "bg-green-500"
+                : check.status === "down"
+                ? "bg-red-500"
+                : "bg-gray-300"
+            }`}
+            title={`${check.status.toUpperCase()} - ${new Date(check.checked_at).toLocaleTimeString()}`}
+          />
+        ))}
+      </div>
+      <p className="text-xs text-gray-400 mt-1">Last 10 checks</p>
+    </div>
+  );
 }
 
 /**
@@ -156,6 +192,11 @@ export default function MonitorCard({
 
       {/* Error message */}
       {error && <div className="px-4 pt-2 text-xs text-red-600">{error}</div>}
+
+      {/* Status history indicator */}
+      <div className="px-4">
+        <StatusHistoryIndicator history={monitor.check_history} />
+      </div>
 
       {/* Action buttons */}
       <div className="p-4 flex gap-2">
