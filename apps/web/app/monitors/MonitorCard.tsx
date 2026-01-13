@@ -83,7 +83,7 @@ export default function MonitorCard({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
       {/* Monitor header with name and status */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex justify-between items-start gap-4">
@@ -92,17 +92,36 @@ export default function MonitorCard({
             <p className="text-sm text-gray-600 truncate">{monitor.url}</p>
           </div>
 
-          {/* Status badge */}
-          <div
-            className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-              currentStatus === "up"
-                ? "bg-green-100 text-green-700"
-                : currentStatus === "down"
-                ? "bg-red-100 text-red-700"
-                : "bg-gray-100 text-gray-600"
-            }`}
-          >
-            {currentStatus ? currentStatus.toUpperCase() : "UNKNOWN"}
+          {/* Status badge with colored dot */}
+          {/* 
+            Status mapping (visual indicators for quick recognition):
+            - UP: Green dot + label (service is healthy)
+            - DOWN: Red dot + label (service is unavailable)
+            - UNKNOWN: Gray dot + label (no data yet)
+          */}
+          <div className="flex-shrink-0 flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-full transition-all duration-300">
+            {/* Colored status dot */}
+            <div
+              className={`w-2 h-2 rounded-full flex-shrink-0 transition-all ${
+                currentStatus === "up"
+                  ? "bg-green-500 shadow-sm"
+                  : currentStatus === "down"
+                  ? "bg-red-500 shadow-sm"
+                  : "bg-gray-400"
+              }`}
+            />
+            {/* Status label */}
+            <span
+              className={`text-xs font-semibold whitespace-nowrap transition-colors ${
+                currentStatus === "up"
+                  ? "text-green-700"
+                  : currentStatus === "down"
+                  ? "text-red-700"
+                  : "text-gray-600"
+              }`}
+            >
+              {currentStatus ? currentStatus.toUpperCase() : "UNKNOWN"}
+            </span>
           </div>
         </div>
       </div>
@@ -124,9 +143,13 @@ export default function MonitorCard({
           </div>
         )}
         {responseTime !== null && responseTime !== undefined && (
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span>Response time:</span>
-            <span className="font-medium text-gray-900">{responseTime}ms</span>
+            {/* Response time in monospace font with subtle transition */}
+            <span className="font-mono text-xs bg-white px-2 py-1 rounded text-gray-800 transition-all duration-300">
+              {responseTime}
+              <span className="text-gray-500 ml-0.5">ms</span>
+            </span>
           </div>
         )}
       </div>
